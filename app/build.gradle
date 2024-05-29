@@ -1,6 +1,7 @@
 plugins {
     id('com.android.application')
     id('com.github.triplet.play') version '3.9.0' apply false
+    id "com.guardsquare.appsweep" version "latest.release"
 }
 apply from: "../common.gradle"
 apply from: "../playFlavor.gradle"
@@ -140,4 +141,7 @@ if (project.hasProperty("antennaPodPlayPublisherCredentials")) {
         track.set('alpha')
         serviceAccountCredentials.set(file(antennaPodPlayPublisherCredentials))
     }
+}
+appsweep {
+    apiKey "gs_appsweep_GnSRzKY_EWdc6foGiRuLpN23PjdXLqmc3YUGuKMV"
 }
