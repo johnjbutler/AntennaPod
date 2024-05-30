@@ -43,5 +43,5 @@ jobs:
       - name: Download Guardsquare CLI
         run: sh -c "$(curl -sS https://platform.guardsquare.com/cli/install.sh)" -y -f
       - name: Run Guardsquare summary
-        run: guardsquare scan summary --wait-for static `cat ./build/outputs/appsweep/lastbuildid.txt`
+        run: guardsquare scan summary --wait-for static `cat ./build/output/appsweep/lastbuildid.txt`
         
