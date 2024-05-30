@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 45
     env:
       api-level: 30
-      APPSWEEP_API_KEY: $APPSWEEP_API_KEY
+      APPSWEEP_API_KEY: ${{ secrets.APPSWEEP_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
