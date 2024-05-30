@@ -40,3 +40,8 @@ jobs:
         run: echo "org.gradle.parallel=true" >> local.properties
       - name: Upload To AppSweep with Gradle
         run: ./gradlew uploadToAppSweepFreeDebug
+      - name: Download Guardsquare CLI
+        run: curl -sS https://platform.guardsquare.com/cli/install.sh | sh
+      - name: Run Guardsquare summary
+        run: guardsquare scan summary --wait-for static `cat ./build/outputs/appsweep/lastbuildid.txt`
+        
