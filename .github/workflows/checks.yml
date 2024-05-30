@@ -43,5 +43,8 @@ jobs:
       - name: Download Guardsquare CLI
         run: sh -c "$(curl -sS https://platform.guardsquare.com/cli/install.sh)" -y -f
       - name: Run Guardsquare summary
-        run: guardsquare scan summary --wait-for static `cat ${{ github.workspace }}/app/build/guardsquare/appsweep/lastBuildID.txt`
+        id: scan_summary
+        run: guardsquare scan summary --wait-for static `cat ${{ github.workspace }}/app/build/guardsquare/appsweep/lastBuildID.txt` --format '{{.High}}'
+      - name: Check Summary Results
+        run: echo ${{ steps.scan_summary.outputs.stdout }}
         
