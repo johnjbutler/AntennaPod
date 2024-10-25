@@ -44,7 +44,7 @@ jobs:
       - name: Configure parallel build
         run: echo "org.gradle.parallel=true" >> local.properties
       - name: Upload To AppSweep with Gradle
-        run: ./gradlew uploadToAppSweepDebug
+        run: ./gradlew uploadToAppSweepFreeDebug
       - name: Download Guardsquare CLI
         run: sh -c "$(curl -sS https://platform.guardsquare.com/cli/install.sh)" -y -f
       - name: Run Guardsquare summary
