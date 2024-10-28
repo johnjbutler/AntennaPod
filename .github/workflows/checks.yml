@@ -1,3 +1,5 @@
+
+
 name: Checks
 
 on:
@@ -51,4 +53,22 @@ jobs:
         id: scan_summary
         run: guardsquare scan summary --wait-for static `cat ${{ github.workspace }}/app/build/guardsquare/appsweep/lastBuildID.txt` --format '{{.High}}' | export high_issue_count=$1
              echo $high_issue_count
+ 
+  # Integrate with Port
+      - uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          identifier: some_identifier  # Adjust as needed
+          title: "AppSweep Scan Results"
+          blueprint: app_sweep
+          properties: |-
+            {
+              "build_url": "${{ env.AS_URL }}",
+              "high": ${{ env.HIGH_ISSUE_COUNT }},
+              "medium": ${{ env.MEDIUM_ISSUE_COUNT }},
+              "low": ${{ env.LOW_ISSUE_COUNT }}
+            }
         
