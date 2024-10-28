@@ -49,11 +49,16 @@ jobs:
         run: ./gradlew uploadToAppSweepFreeDebug
       - name: Download Guardsquare CLI
         run: sh -c "$(curl -sS https://platform.guardsquare.com/cli/install.sh)" -y -f
+     # Run Guardsquare summary and export findings to environment variables
       - name: Run Guardsquare summary
         id: scan_summary
-        run: guardsquare scan summary --wait-for static `cat ${{ github.workspace }}/app/build/guardsquare/appsweep/lastBuildID.txt` --format '{{.High}}' | export high_issue_count=$1
-             echo $high_issue_count
- 
+        run: |
+          AS_ID=$(cat ${{ github.workspace }}/app/build/guardsquare/appsweep/lastBuildID.txt)
+          echo "AS_URL=https://appsweep.guardsquare.com/builds/${AS_ID}" >> $GITHUB_ENV
+          echo "HIGH_ISSUE_COUNT=$(guardsquare scan summary --wait-for static ${AS_ID} --format '{{.High}}')" >> $GITHUB_ENV
+          echo "MEDIUM_ISSUE_COUNT=$(guardsquare scan summary --wait-for static ${AS_ID} --format '{{.Medium}}')" >> $GITHUB_ENV
+          echo "LOW_ISSUE_COUNT=$(guardsquare scan summary --wait-for static ${AS_ID} --format '{{.Low}}')" >> $GITHUB_ENV
+
   # Integrate with Port
       - uses: port-labs/port-github-action@v1
         with:
@@ -67,8 +72,7 @@ jobs:
           properties: |-
             {
               "build_url": "${{ env.AS_URL }}",
-              "high": ${{ env.HIGH_ISSUE_COUNT }},
-              "medium": ${{ env.MEDIUM_ISSUE_COUNT }},
-              "low": ${{ env.LOW_ISSUE_COUNT }}
+              "high": "${{ env.HIGH_ISSUE_COUNT }}",
+              "medium": "${{ env.MEDIUM_ISSUE_COUNT }}",
+              "low": "${{ env.LOW_ISSUE_COUNT }}"
             }
-        
