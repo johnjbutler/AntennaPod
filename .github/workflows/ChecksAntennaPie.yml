@@ -1,0 +1,78 @@
+
+
+name: Checks
+
+on:
+  workflow_dispatch:
+  
+  pull_request:
+    types: [opened, synchronize, reopened]
+  
+  push:
+    branches:
+      - master
+      - develop
+
+jobs:
+  wrapper-validation:
+    name: "Gradle Wrapper Validation"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v2
+
+  appsweep-scan:
+    name: "AppSweep Scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      api-level: 30
+      APPSWEEP_API_KEY: ${{ secrets.APPSWEEP_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Configure parallel build
+        run: echo "org.gradle.parallel=true" >> local.properties
+      - name: Upload To AppSweep with Gradle
+        run: ./gradlew uploadToAppSweepFreeDebug
+      - name: Download Guardsquare CLI
+        run: sh -c "$(curl -sS https://platform.guardsquare.com/cli/install.sh)" -y -f
+     # Run Guardsquare summary and export findings to environment variables
+      - name: Run Guardsquare summary
+        id: scan_summary
+        run: |
+          cat ${{ github.workspace }}/app/build/guardsquare/appsweep/lastBuildID.txt
+          AS_ID=$(cat ${{ github.workspace }}/app/build/guardsquare/appsweep/lastBuildID.txt)
+          echo "AS_URL=https://appsweep.guardsquare.com/builds/${AS_ID}" >> $GITHUB_ENV
+          echo "HIGH_ISSUE_COUNT=$(guardsquare scan summary --wait-for static ${AS_ID} --format '{{.High}}')" >> $GITHUB_ENV
+          echo "MEDIUM_ISSUE_COUNT=$(guardsquare scan summary --wait-for static ${AS_ID} --format '{{.Medium}}')" >> $GITHUB_ENV
+          echo "LOW_ISSUE_COUNT=$(guardsquare scan summary --wait-for static ${AS_ID} --format '{{.Low}}')" >> $GITHUB_ENV
+  # Integrate with Port
+      - uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          identifier: AppSweep_Results_GHActions  # Adjust as needed
+          title: "AntennaPod AppSweep Scan Results"
+          blueprint: app_sweep
+          properties: |-
+            {
+              "build_url": "${{ env.AS_URL }}",
+              "high": "${{ env.HIGH_ISSUE_COUNT }}",
+              "medium": "${{ env.MEDIUM_ISSUE_COUNT }}",
+              "low": "${{ env.LOW_ISSUE_COUNT }}"
+            }
