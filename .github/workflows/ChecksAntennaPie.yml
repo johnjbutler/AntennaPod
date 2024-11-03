@@ -1,17 +1,17 @@
 
 
-name: Checks
+name: ChecksAntennaPie
 
 on:
   workflow_dispatch:
   
-  pull_request:
-    types: [opened, synchronize, reopened]
+#   pull_request:
+#     types: [opened, synchronize, reopened]
   
-  push:
-    branches:
-      - master
-      - develop
+#   push:
+#     branches:
+#       - master
+#       - develop
 
 jobs:
   wrapper-validation:
@@ -53,7 +53,9 @@ jobs:
       - name: Run Guardsquare summary
         id: scan_summary
         run: |
-          echo "AS_URL=https://appsweep.guardsquare.com/builds/a336be98-d2a0-4d17-8805-26f36f832a1b" >> $GITHUB_ENV
+         # Retrieve AS_ID from the last build ID file
+          AS_ID=$(cat "${{ github.workspace }}/app/build/guardsquare/appsweep/lastBuildID.txt")
+          echo "AS_URL=https://appsweep.guardsquare.com/builds/${AS_ID}" >> $GITHUB_ENV
           
           # Run and display the output of each guardsquare command to debug
           HIGH_ISSUE_COUNT=$(guardsquare scan summary --wait-for=static ${AS_ID} --format           '{{.High}}')
