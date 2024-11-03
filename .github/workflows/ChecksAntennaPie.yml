@@ -53,11 +53,20 @@ jobs:
       - name: Run Guardsquare summary
         id: scan_summary
         run: |
-          cat ${{ github.workspace }}/app/build/guardsquare/appsweep/lastBuildID.txt
-          echo "AS_URL=https://appsweep.guardsquare.com/builds/d4336cc9-312c-4bf9-b87e-883276f0f069" >> $GITHUB_ENV
-          echo "HIGH_ISSUE_COUNT=$(guardsquare scan summary --wait-for static ${AS_ID} --format '{{.High}}')" >> $GITHUB_ENV
-          echo "MEDIUM_ISSUE_COUNT=$(guardsquare scan summary --wait-for static ${AS_ID} --format '{{.Medium}}')" >> $GITHUB_ENV
-          echo "LOW_ISSUE_COUNT=$(guardsquare scan summary --wait-for static ${AS_ID} --format '{{.Low}}')" >> $GITHUB_ENV
+          echo "AS_URL=https://appsweep.guardsquare.com/builds/a336be98-d2a0-4d17-8805-26f36f832a1b" >> $GITHUB_ENV
+          
+          # Run and display the output of each guardsquare command to debug
+          HIGH_ISSUE_COUNT=$(guardsquare scan summary --wait-for=static ${AS_ID} --format           '{{.High}}')
+          echo "High Issue Count: ${HIGH_ISSUE_COUNT}"
+          echo "HIGH_ISSUE_COUNT=${HIGH_ISSUE_COUNT}" >> $GITHUB_ENV
+          
+          MEDIUM_ISSUE_COUNT=$(guardsquare scan summary --wait-for=static ${AS_ID} --format           '{{.Medium}}')
+          echo "Medium Issue Count: ${MEDIUM_ISSUE_COUNT}"
+          echo "MEDIUM_ISSUE_COUNT=${MEDIUM_ISSUE_COUNT}" >> $GITHUB_ENV
+          
+          LOW_ISSUE_COUNT=$(guardsquare scan summary --wait-for=static ${AS_ID} --format           '{{.Low}}')
+          echo "Low Issue Count: ${LOW_ISSUE_COUNT}"
+          echo "LOW_ISSUE_COUNT=${LOW_ISSUE_COUNT}" >> $GITHUB_ENV
   # Integrate with Port
       - uses: port-labs/port-github-action@v1
         with:
