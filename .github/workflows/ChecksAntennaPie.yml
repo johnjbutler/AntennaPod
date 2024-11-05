@@ -68,7 +68,7 @@ jobs:
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
           baseUrl: https://api.getport.io
           operation: UPSERT
-          identifier: AppSweep_Results_GHActions  # Adjust as needed
+          identifier: AppSweep_AntennaPod_Android  # Adjust as needed
           title: "AntennaPod AppSweep Scan Results"
           blueprint: app_sweep
           properties: |-
